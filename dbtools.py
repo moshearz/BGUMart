@@ -66,3 +66,22 @@ class Dao(object):
                .format(self._table_name,' AND '.join([col + '=?' for col in column_names]))
  
         self._conn.cursor().execute(stmt, params)
+
+    def update(self, dto_instance):
+        ins_dict = vars(dto_instance)
+        
+        # Assuming first field is the primary key
+        primary_key = list(ins_dict.keys())[0]
+        primary_key_value = ins_dict[primary_key]
+        
+        # Remove primary key from update fields
+        del ins_dict[primary_key]
+        
+        set_expr = ', '.join([key + '=?' for key in ins_dict.keys()])
+        params = list(ins_dict.values())
+        params.append(primary_key_value)
+        
+        stmt = 'UPDATE {} SET {} WHERE {}=?'.format(
+            self._table_name, set_expr, primary_key)
+            
+        self._conn.execute(stmt, params)
